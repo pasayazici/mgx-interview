@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Data Source=interview.db
+    volumes:
+      - ./interview.db:/app/interview.db
