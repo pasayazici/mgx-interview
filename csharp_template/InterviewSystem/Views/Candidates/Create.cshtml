@@ -1,0 +1,31 @@
+@* InterviewSystem/Views/Candidates/Create.cshtml *@
+@{
+    ViewData["Title"] = "Add Candidates";
+}
+
+<div class="container mt-4">
+    <h2>Add Candidates</h2>
+    <form asp-action="Create" method="post">
+        <div class="form-group">
+            <label for="interviewId">Interview</label>
+            <select id="interviewId" name="interviewId" class="form-control" required>
+                <option value="">Select Interview</option>
+                @foreach (var interview in ViewBag.Interviews)
+                {
+                    <option value="@interview.Id">@interview.Title</option>
+                }
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="emails">Email Addresses (one per line)</label>
+            <textarea id="emails" name="emails" class="form-control" rows="10" required></textarea>
+            <small class="form-text text-muted">Enter each email address on a new line.</small>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Candidates</button>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

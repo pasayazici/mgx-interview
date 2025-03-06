@@ -1,0 +1,23 @@
+@* InterviewSystem/Views/Companies/Edit.cshtml *@
+@model InterviewSystem.Application.DTOs.CompanyDto
+@{
+    ViewData["Title"] = "Edit Company";
+}
+
+<div class="container mt-4">
+    <h2>Edit Company</h2>
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="Id" />
+        <div class="form-group">
+            <label asp-for="Name"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

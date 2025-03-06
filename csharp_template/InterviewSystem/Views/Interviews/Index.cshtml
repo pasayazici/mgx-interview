@@ -1,0 +1,120 @@
+@* InterviewSystem/Views/Interviews/Index.cshtml *@
+@model IEnumerable<InterviewSystem.Application.DTOs.InterviewDto>
+@{
+    ViewData["Title"] = "Interviews";
+}
+
+<div class="container mt-4">
+    <h2>Interviews</h2>
+    
+    <div class="mb-3">
+        <a asp-action="Create" class="btn btn-primary">Create New Interview</a>
+    </div>
+
+    <div class="mb-3">
+        <div class="form-group">
+            <label for="companyFilter">Filter by Company</label>
+            <select id="companyFilter" class="form-control">
+                @foreach (var company in ViewBag.Companies)
+                {
+                    <option value="@company.Id">@company.Name</option>
+                }
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Filter by Status</label>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary active" data-status="active">Active</button>
+                <button type="button" class="btn btn-outline-primary" data-status="passive">Passive</button>
+                <button type="button" class="btn btn-outline-primary" data-status="deleted">Deleted</button>
+            </div>
+        </div>
+    </div>
+
+    <table class="table" id="interviewsTable">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Company</th>
+                <th>Duration</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var interview in Model)
+            {
+                <tr>
+                    <td>@interview.Title</td>
+                    <td>@interview.CompanyName</td>
+                    <td>@interview.Duration seconds</td>
+                    <td>@interview.StartDate.ToString("g")</td>
+                    <td>@interview.EndDate.ToString("g")</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@interview.Id" class="btn btn-sm btn-warning">Edit</a>
+                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin"))
+                        {
+                            <form asp-action="Delete" asp-route-id="@interview.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">Delete</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Company filter
+            $('#companyFilter').change(function() {
+                var firmId = $(this).val();
+                $.get('/Interviews/GetByCompany', { firmId: firmId }, function(data) {
+                    updateTable(data);
+                });
+            });
+
+            // Status filter
+            $('.btn-group button').click(function() {
+                $('.btn-group button').removeClass('active');
+                $(this).addClass('active');
+                filterByStatus($(this).data('status'));
+            });
+        });
+
+        function updateTable(interviews) {
+            var tbody = $('#interviewsTable tbody');
+            tbody.empty();
+            interviews.forEach(function(interview) {
+                var row = createInterviewRow(interview);
+                tbody.append(row);
+            });
+        }
+
+        function createInterviewRow(interview) {
+            // Create table row HTML
+            return `<tr>
+                <td>${interview.title}</td>
+                <td>${interview.companyName}</td>
+                <td>${interview.duration} seconds</td>
+                <td>${new Date(interview.startDate).toLocaleString()}</td>
+                <td>${new Date(interview.endDate).toLocaleString()}</td>
+                <td>
+                    <a href="/Interviews/Edit/${interview.id}" class="btn btn-sm btn-warning">Edit</a>
+                    ${canDelete() ? `
+                        <form asp-action="Delete" asp-route-id="${interview.id}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">Delete</button>
+                        </form>
+                    ` : ''}
+                </td>
+            </tr>`;
+        }
+
+        function canDelete() {
+            return @(User.IsInRole("SuperAdmin") || User.IsInRole("Admin")).toString().toLowerCase();
+        }
+    </script>
+}

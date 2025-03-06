@@ -1,0 +1,117 @@
+@* InterviewSystem/Views/Candidates/Index.cshtml *@
+@model IEnumerable<InterviewSystem.Application.DTOs.CandidateDto>
+@{
+    ViewData["Title"] = "Candidates";
+}
+
+<div class="container mt-4">
+    <h2>Candidates</h2>
+    
+    <div class="mb-3">
+        <a asp-action="Create" class="btn btn-primary">Add Candidates</a>
+        <button id="btnAnalyzeSelected" class="btn btn-info">Analyze Selected</button>
+        <button id="btnAnalyzeAll" class="btn btn-info">Analyze All</button>
+        <button id="btnAnalyzeErrors" class="btn btn-warning">Retry Failed Analysis</button>
+        <button id="btnRefreshSelected" class="btn btn-secondary">Refresh Selected Status</button>
+        <button id="btnRefreshAll" class="btn btn-secondary">Refresh All Status</button>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    <input type="checkbox" id="selectAll" />
+                </th>
+                <th>Email</th>
+                <th>Interview</th>
+                <th>Status</th>
+                <th>Registration Date</th>
+                <th>Interview Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var candidate in Model)
+            {
+                <tr>
+                    <td>
+                        <input type="checkbox" class="candidate-select" value="@candidate.Id" />
+                    </td>
+                    <td>@candidate.Email</td>
+                    <td>@candidate.InterviewTitle</td>
+                    <td>@candidate.Status</td>
+                    <td>@candidate.RegistrationDate.ToString("g")</td>
+                    <td>@(candidate.InterviewDate?.ToString("g") ?? "-")</td>
+                    <td>
+                        <a asp-action="Review" asp-route-id="@candidate.Id" class="btn btn-sm btn-info">Review</a>
+                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin"))
+                        {
+                            <form asp-action="Delete" asp-route-id="@candidate.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">Delete</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Select all checkbox
+            $('#selectAll').change(function() {
+                $('.candidate-select').prop('checked', $(this).prop('checked'));
+            });
+
+            // Analyze Selected
+            $('#btnAnalyzeSelected').click(function() {
+                submitSelected('RunAnalysis');
+            });
+
+            // Refresh Selected
+            $('#btnRefreshSelected').click(function() {
+                submitSelected('RefreshStatus');
+            });
+
+            // Analyze All
+            $('#btnAnalyzeAll').click(function() {
+                $('.candidate-select').prop('checked', true);
+                submitSelected('RunAnalysis');
+            });
+
+            // Analyze Errors
+            $('#btnAnalyzeErrors').click(function() {
+                $('.candidate-select').prop('checked', false);
+                $('tr:contains("Failed")').find('.candidate-select').prop('checked', true);
+                submitSelected('RunAnalysis');
+            });
+
+            // Refresh All
+            $('#btnRefreshAll').click(function() {
+                $('.candidate-select').prop('checked', true);
+                submitSelected('RefreshStatus');
+            });
+        });
+
+        function submitSelected(action) {
+            var selectedIds = $('.candidate-select:checked').map(function() {
+                return $(this).val();
+            }).get();
+
+            if (selectedIds.length === 0) {
+                alert('Please select at least one candidate.');
+                return;
+            }
+
+            var form = $('<form action="/Candidates/' + action + '" method="post"></form>');
+            form.append('@Html.AntiForgeryToken()');
+            selectedIds.forEach(function(id) {
+                form.append('<input type="hidden" name="selectedIds[]" value="' + id + '" />');
+            });
+            $('body').append(form);
+            form.submit();
+        }
+    </script>
+}

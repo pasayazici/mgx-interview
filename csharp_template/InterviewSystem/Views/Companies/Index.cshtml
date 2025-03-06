@@ -1,0 +1,36 @@
+@* InterviewSystem/Views/Companies/Index.cshtml *@
+@model IEnumerable<InterviewSystem.Application.DTOs.CompanyDto>
+@{
+    ViewData["Title"] = "Companies";
+}
+
+<div class="container mt-4">
+    <h2>Companies</h2>
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Create New Company</a>
+    </p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var company in Model)
+            {
+                <tr>
+                    <td>@company.Name</td>
+                    <td>@company.CreatedAt.ToString("g")</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@company.Id" class="btn btn-sm btn-warning">Edit</a>
+                        <form asp-action="Delete" asp-route-id="@company.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,103 @@
+classDiagram
+    class BaseEntity {
+        +Guid Id
+        +bool IsDeleted
+        +DateTime CreatedAt
+        +DateTime? UpdatedAt
+    }
+
+    class User {
+        +string Username
+        +string Email
+        +string PasswordHash
+        +UserRole Role
+        +Guid FirmId
+        +Company Company
+        +List~Interview~ Interviews
+        +Create(UserDto dto)
+        +Update(UserDto dto)
+        +Delete()
+        +ChangePassword(string newPassword)
+    }
+
+    class Company {
+        +string Name
+        +List~User~ Users
+        +List~Interview~ Interviews
+        +Create(CompanyDto dto)
+        +Update(CompanyDto dto)
+        +Delete()
+    }
+
+    class Interview {
+        +string Title
+        +string Question
+        +string Details
+        +int Duration
+        +DateTime StartDate
+        +DateTime EndDate
+        +Guid FirmId
+        +Company Company
+        +List~Candidate~ Candidates
+        +Create(InterviewDto dto)
+        +Update(InterviewDto dto)
+        +Delete()
+    }
+
+    class Candidate {
+        +string Id
+        +Guid InterviewId
+        +string Email
+        +InterviewStatus Status
+        +DateTime RegistrationDate
+        +DateTime? InterviewDate
+        +string VideoUrl
+        +int? Score
+        +string? Feedback
+        +Interview Interview
+        +Create(CandidateDto dto)
+        +Update(CandidateDto dto)
+        +Delete()
+        +UpdateStatus(InterviewStatus status)
+        +AddFeedback(int score, string feedback)
+    }
+
+    class AuthService {
+        +User CurrentUser
+        +Login(string username, string password)
+        +Logout()
+        +GenerateJwtToken(User user)
+        +ValidateToken(string token)
+        +HasPermission(string permission)
+    }
+
+    class InterviewService {
+        +List~Interview~ GetInterviews(InterviewFilter filter)
+        +Interview GetById(Guid id)
+        +Create(InterviewDto dto)
+        +Update(InterviewDto dto)
+        +Delete(Guid id)
+        +GetActiveInterviews()
+        +GetPassiveInterviews()
+        +GetDeletedInterviews()
+    }
+
+    class CandidateService {
+        +List~Candidate~ GetCandidates(CandidateFilter filter)
+        +Candidate GetById(string id)
+        +Create(CandidateDto dto)
+        +BulkCreate(List~string~ emails, Guid interviewId)
+        +Update(CandidateDto dto)
+        +Delete(string id)
+        +RunAnalysis(List~string~ candidateIds)
+        +RefreshStatus(List~string~ candidateIds)
+    }
+
+    BaseEntity <|-- User
+    BaseEntity <|-- Company
+    BaseEntity <|-- Interview
+    BaseEntity <|-- Candidate
+
+    Company "1" -- "*" User
+    Company "1" -- "*" Interview
+    Interview "1" -- "*" Candidate

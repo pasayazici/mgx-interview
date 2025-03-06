@@ -1,0 +1,63 @@
+sequenceDiagram
+    participant Client
+    participant Auth as AuthController
+    participant User as UserController
+    participant Interview as InterviewController
+    participant Candidate as CandidateController
+    participant AuthSvc as AuthService
+    participant UserSvc as UserService
+    participant IntSvc as InterviewService
+    participant CandSvc as CandidateService
+    participant DB as Database
+
+    %% Authentication Flow
+    Client->>Auth: Login(username, password)
+    Auth->>AuthSvc: ValidateCredentials()
+    AuthSvc->>DB: GetUser()
+    DB-->>AuthSvc: User
+    AuthSvc->>AuthSvc: GenerateJwtToken()
+    AuthSvc-->>Auth: Token
+    Auth-->>Client: Token + User Info
+
+    %% User Management Flow
+    Client->>User: CreateUser(UserDto)
+    User->>AuthSvc: ValidatePermission()
+    AuthSvc-->>User: Authorized
+    User->>UserSvc: Create(UserDto)
+    UserSvc->>DB: Insert()
+    DB-->>UserSvc: UserId
+    UserSvc-->>User: Result
+    User-->>Client: Success
+
+    %% Interview Creation Flow
+    Client->>Interview: CreateInterview(InterviewDto)
+    Interview->>AuthSvc: ValidatePermission()
+    AuthSvc-->>Interview: Authorized
+    Interview->>IntSvc: Create(InterviewDto)
+    IntSvc->>DB: Insert()
+    DB-->>IntSvc: InterviewId
+    IntSvc-->>Interview: Result
+    Interview-->>Client: Success
+
+    %% Candidate Management Flow
+    Client->>Candidate: BulkCreateCandidates(emails, interviewId)
+    Candidate->>AuthSvc: ValidatePermission()
+    AuthSvc-->>Candidate: Authorized
+    Candidate->>CandSvc: BulkCreate(emails, interviewId)
+    CandSvc->>CandSvc: GenerateUUIDv7()
+    CandSvc->>CandSvc: ValidateEmails()
+    CandSvc->>DB: BulkInsert()
+    DB-->>CandSvc: CandidateIds
+    CandSvc-->>Candidate: Result
+    Candidate-->>Client: Success
+
+    %% Analysis Flow
+    Client->>Candidate: RunAnalysis(candidateIds)
+    Candidate->>AuthSvc: ValidatePermission()
+    AuthSvc-->>Candidate: Authorized
+    Candidate->>CandSvc: RunAnalysis(candidateIds)
+    CandSvc->>CandSvc: ProcessVideos()
+    CandSvc->>DB: UpdateStatus()
+    DB-->>CandSvc: Success
+    CandSvc-->>Candidate: Result
+    Candidate-->>Client: Success

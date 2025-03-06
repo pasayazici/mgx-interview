@@ -1,0 +1,49 @@
+<!-- Views/Home/Index.cshtml -->
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to Interview System</h1>
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Companies</h5>
+                    <p class="card-text">Manage company profiles and details.</p>
+                    <a asp-controller="Companies" asp-action="Index" class="btn btn-primary">View Companies</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Interviews</h5>
+                    <p class="card-text">Schedule and manage interviews.</p>
+                    <a asp-controller="Interviews" asp-action="Index" class="btn btn-primary">View Interviews</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Candidates</h5>
+                    <p class="card-text">Track candidate applications and status.</p>
+                    <a asp-controller="Candidates" asp-action="Index" class="btn btn-primary">View Candidates</a>
+                </div>
+            </div>
+        </div>
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Users</h5>
+                        <p class="card-text">Manage system users and roles.</p>
+                        <a asp-controller="Users" asp-action="Index" class="btn btn-primary">Manage Users</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
